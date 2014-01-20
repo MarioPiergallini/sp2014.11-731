@@ -1,7 +1,7 @@
 ---
 name:
-   first: Chris
-   last: Dyer
-email: cdyer@cs.cmu.edu
-leaderboard: ProfDyer
-languages: [eng,deu]
+   first: Mario
+   last: Piergallini
+email: mpiergal@cmu.edu
+leaderboard: PålRyding
+languages: [eng,spa,swe]

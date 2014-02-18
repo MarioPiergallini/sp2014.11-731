@@ -3,5 +3,5 @@ name:
    first: Mario
    last: Piergallini
 email: mpiergal@cmu.edu
-leaderboard: PålRyding
+leaderboard: PaalRyding
 languages: [eng,spa,swe]

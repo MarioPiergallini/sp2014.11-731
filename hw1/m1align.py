@@ -22,7 +22,7 @@ if __name__ == '__main__':
         return aligned
     
     data = 'data//dev-test-train.de-en'
-    bitext = [[sentence.strip().split() for sentence in pair.split(' ||| ')] for pair in open(data)]
+    bitext = [[sentence.strip().lower().split() for sentence in pair.split(' ||| ')] for pair in open(data)]
     
     for sent in bitext:
       sent[0].append("")

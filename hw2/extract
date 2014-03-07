@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
 import argparse
@@ -5,11 +6,77 @@ import json
 import os, sys, math
 
 def extract_features(hyp, ref):
-  hwords = hyp.lower().split()
-  rwords = ref.lower().split()
+  hwords = unicode(hyp).lower().split()
+  rwords = unicode(ref).lower().split()
   refset = set(rwords)
-  precision = sum(1.0 for word in hwords if word in refset) / len(hwords)
-  return {'prec':precision}
+  hypset = set(hwords)
+  '''precision = sum(1.0 for word in hwords if word in refset) / len(hwords)
+  recall = sum(1.0 for word in rwords if word in hypset) / len(rwords)
+  htruncs = []
+  rtruncs = []
+  for word in hwords:
+    htruncs.append(word[:6])
+  for word in rwords:
+    rtruncs.append(word[:6])
+  rtruncSet = set(rtruncs)
+  htruncSet = set(htruncs)
+  tPrecision = sum(1.0 for word in htruncs if word in rtruncSet) / len(htruncs)
+  tRecall = sum(1.0 for word in rtruncs if word in htruncSet) / len(rtruncs)'''
+  trunc = 2
+  wpcount = 0.0
+  for hword in hwords:
+    if hword in refset:
+      wpcount += 1
+    else:
+      toadd = 0
+      mostmatch = 0
+      for rword in refset:
+        if hword[:trunc] != rword[:trunc]:
+          continue
+        for i in range(trunc,len(hword)):
+          if hword[:i] == rword[:i]:
+            if i >= mostmatch:
+              mostmatch = i
+            else:
+              continue
+            hmatch = float(i)/len(hword)
+            rmatch = float(i)/len(rword)
+            match = 2*hmatch*rmatch/(hmatch + rmatch)
+            #match = (hmatch + rmatch)/2
+            if match > toadd:
+              toadd = match
+          else:
+            break
+      wpcount += toadd
+  weightPrec = wpcount/len(hwords)
+  wrcount = 0.0
+  for rword in rwords:
+    if rword in hypset:
+      wrcount += 1
+    else:
+      toadd = 0
+      mostmatch = 0
+      for hword in hypset:
+        if rword[:trunc] != hword[:trunc]:
+          continue
+        for i in range(trunc,len(rword)):
+          if i >= mostmatch:
+            mostmatch = i
+          else:
+            continue
+          if rword[:i] == hword[:i]:
+            hmatch = float(i)/len(hword)
+            rmatch = float(i)/len(rword)
+            match = 2*hmatch*rmatch/(hmatch + rmatch)
+            #match = (hmatch + rmatch)/2
+            if match > toadd:
+              toadd = match
+          else:
+            break
+      wrcount += toadd
+  weightRec = wrcount/len(rwords)
+  #return {'prec':precision,'rec':recall,'tprec':tPrecision,'trec':tRecall,'wprec':weightPrec,'wrec':weightRec}
+  return {'wprec':weightPrec,'wrec':weightRec}
 
 argparser = argparse.ArgumentParser(prog='extract')
 argparser.add_argument('-x', '--pairs', dest='pairs', default='data/en-cs.pairs', help='Reference-Hypothesis pairs')
@@ -19,9 +86,14 @@ args = argparser.parse_args()
 lc = 0
 sys.stderr.write('Extracting features for (ref,hyp) pairs from %s.\n' % args.pairs)
 # loop over all (ref,hyp) pairs in the input file and extract evaluation features
+count = 0
 for ref_hyp in open(args.pairs):
   lc += 1
   ref, hyp = ref_hyp.rstrip().split(' ||| ')
   fmap = extract_features(hyp, ref)
+  print ref
+  print hyp
   print json.dumps(fmap)   # print evaluation feature map
-
+  count += 1
+  if count > 5:
+    break

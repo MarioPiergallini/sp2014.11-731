@@ -22,6 +22,16 @@ def extract_features(hyp, ref):
   htruncSet = set(htruncs)
   tPrecision = sum(1.0 for word in htruncs if word in rtruncSet) / len(htruncs)
   tRecall = sum(1.0 for word in rtruncs if word in htruncSet) / len(rtruncs)'''
+  hbigram = []
+  rbigram = []
+  for i in range(0,len(hwords)-1):
+    hbigram.append(hwords[i] + hwords[i+1])
+  for i in range(0,len(rwords)-1):
+    rbigram.append(rwords[i] + rwords[i+1])
+  hbiset = set(hbigram)
+  rbiset = set(rbigram)
+  biprec = sum(1.0 for bigram in hbigram if bigram in rbiset) / len(hbigram)
+  birec = sum(1.0 for bigram in rbigram if bigram in hbiset) / len(rbigram)
   trunc = 2
   wpcount = 0.0
   for hword in hwords:
@@ -76,7 +86,7 @@ def extract_features(hyp, ref):
       wrcount += toadd
   weightRec = wrcount/len(rwords)
   #return {'prec':precision,'rec':recall,'tprec':tPrecision,'trec':tRecall,'wprec':weightPrec,'wrec':weightRec}
-  return {'wprec':weightPrec,'wrec':weightRec}
+  return {'wprec':weightPrec,'wrec':weightRec,'biprec':biprec,'birec':birec}
 
 argparser = argparse.ArgumentParser(prog='extract')
 argparser.add_argument('-x', '--pairs', dest='pairs', default='data/en-cs.pairs', help='Reference-Hypothesis pairs')

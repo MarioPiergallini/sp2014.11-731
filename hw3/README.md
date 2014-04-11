@@ -1,3 +1,12 @@
+mpiergal
+jdoornbos
+
+We simply implemented the ability to swap adjacent phrases.
+
+When it finds a phrase X in the translation model, it adds it to the hypotheses on the appropriate stack. But then it finds the next phrase Y (if any) that begins with the following word. For each one it finds, it then adds Y + X (the reversed order) to the hypotheses on the appropriate stack (which would be later since it translates more of the input).
+
+This doesn't keep track of what has already been translated (but it doesn't need to). It could be made more efficient by using more dynamic programming to avoid duplicating work.
+
 There are three Python programs here (`-h` for usage):
 
  - `./decode` a simple non-reordering (monotone) phrase-based decoder

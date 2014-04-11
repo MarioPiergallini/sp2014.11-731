@@ -38,7 +38,6 @@ for f in input_sents:
     for h in heapq.nlargest(opts.s, stack.itervalues(), key=lambda h: h.logprob):  # prune
       for j in xrange(i + 1, len(f) + 1):
         if f[i:j] in tm:
-#          print f[i:j]
           for phrase in tm[f[i:j]]:
             logprob = h.logprob + phrase.logprob
             lm_state = h.lm_state
@@ -53,15 +52,8 @@ for f in input_sents:
             if j < len(f):
               for k in xrange(j, len(f) + 1):
                 if f[j:k] in tm:
-#                  print "Current phrase:",
-#                  for w in f[i:j]:
-#                    print w,
-#                  print "\t",
-#                  print "Next phrase:",
-#                  for w in f[j:k]:
-#                    print w,
-#                  print
                   for phrase2 in tm[f[j:k]]:
+                    #"translate" the second phrase first...
                     logprob2 = h.logprob + phrase2.logprob
                     lm_state2 = h.lm_state
                     for word in phrase2.english.split():
@@ -70,11 +62,13 @@ for f in input_sents:
                     logprob2 += lm.end(lm_state2) if k == len(f) else 0.0
                     new_swap_hypothesis = hypothesis(logprob2, lm_state2, h, phrase2)
                     
+                    #then translate the first phrase
                     logprob2 += phrase.logprob
                     for word in phrase.english.split():
                       (lm_state2, word_logprob) = lm.score(lm_state2, word)
                       logprob2 += word_logprob
                     
+                    #then add the combination of phrase2 + phrase1 to the stack at the appropriate position
                     new_swap_hypothesis = hypothesis(logprob2, lm_state2, new_swap_hypothesis, phrase)
                     if lm_state2 not in stacks[k] or stacks[k][lm_state2].logprob < logprob2:  # second case is recombination
                       stacks[k][lm_state2] = new_swap_hypothesis  
